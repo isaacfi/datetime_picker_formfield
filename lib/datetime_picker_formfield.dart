@@ -32,7 +32,7 @@ class DateTimePickerFormField extends FormField<DateTime> {
   /// The date the calendar opens to when displayed. Defaults to the current date.
   ///
   /// To preset the widget's value, use [initialValue] instead.
-  final DateTime initialDate;
+  DateTime initialDate;
 
   /// The earliest choosable date. Defaults to 1900.
   final DateTime firstDate;
