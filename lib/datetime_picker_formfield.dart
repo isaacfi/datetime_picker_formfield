@@ -232,6 +232,7 @@ class _DateTimePickerTextFormFieldState extends FormFieldState<DateTime> {
         );
 
     if (widget.inputType != InputType.time) {
+      print(widget.firstDate);
       var date = await showDatePicker(
           context: context,
           firstDate: widget.firstDate,
