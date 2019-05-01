@@ -272,7 +272,7 @@ class _DateTimePickerTextFormFieldState extends FormFieldState<DateTime> {
                   ? IconButton(
                       icon: Icon(widget.resetIcon),
                       onPressed: () {
-                        widget.initialValue = null;
+                        widget.initialDate = null;
                         widget.focusNode.unfocus();
                         _previousValue = '';
                         widget.controller.clear();
