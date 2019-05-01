@@ -100,6 +100,11 @@ class DateTimePickerFormField extends FormField<DateTime> {
   /// changes, use the [controller] and [focusNode].
   final ValueChanged<DateTime> onChanged;
 
+  /// The [builder] parameter can be used to wrap the dialog widget
+  /// to add inherited widgets like [Localizations.override],
+  /// [Directionality], or [MediaQuery].
+  final TransitionBuilder datePickerBuilder;
+
   DateTimePickerFormField({
     Key key,
     @required this.format,
@@ -120,6 +125,7 @@ class DateTimePickerFormField extends FormField<DateTime> {
     this.locale,
     this.selectableDayPredicate,
     this.textDirection,
+    this.datePickerBuilder,
 
     // TextField properties
     TextEditingController controller,
@@ -142,9 +148,9 @@ class DateTimePickerFormField extends FormField<DateTime> {
         inputType = inputType ?? (dateOnly ? InputType.date : InputType.both),
         dateOnly = inputType == InputType.date,
         focusNode = focusNode ?? FocusNode(),
-        initialDate = initialDate ?? DateTime.now(),
-        firstDate = firstDate ?? DateTime(1900),
-        lastDate = lastDate ?? DateTime(2100),
+        initialDate = initialDate ?? lastDate ?? DateTime(DateTime.now().year + 100),
+        firstDate = firstDate ?? DateTime(DateTime.now().year -100),
+        lastDate = lastDate ?? DateTime(DateTime.now().year + 100),
         initialDatePickerMode = initialDatePickerMode ?? DatePickerMode.day,
         super(
             key: key,
@@ -228,11 +234,18 @@ class _DateTimePickerTextFormFieldState extends FormFieldState<DateTime> {
       BuildContext context, DateTime initialDate, TimeOfDay initialTime) async {
     Future<TimeOfDay> getTime() => showTimePicker(
           context: context,
+          builder: widget.datePickerBuilder,
           initialTime: initialTime ?? TimeOfDay.now(),
         );
 
+    if (MediaQuery.of(context).viewInsets.bottom > 0) {
+      FocusScope.of(context).requestFocus(new FocusNode());
+      // add a delay just to be sure that keyboard is no longer visible
+      await Future.delayed(Duration(milliseconds: 300));
+    }
+
     if (widget.inputType != InputType.time) {
-      print(widget.firstDate);
+      print('Initial Date: $initialDate');
       var date = await showDatePicker(
           context: context,
           firstDate: widget.firstDate,
@@ -241,7 +254,8 @@ class _DateTimePickerTextFormFieldState extends FormFieldState<DateTime> {
           initialDatePickerMode: widget.initialDatePickerMode,
           locale: widget.locale,
           selectableDayPredicate: widget.selectableDayPredicate,
-          textDirection: widget.textDirection);
+          textDirection: widget.textDirection,
+          builder: widget.datePickerBuilder);
       if (date != null) {
         date = DateTime(date.year, date.month, date.day);
         if (widget.inputType == InputType.both) {
@@ -273,7 +287,6 @@ class _DateTimePickerTextFormFieldState extends FormFieldState<DateTime> {
                   ? IconButton(
                       icon: Icon(widget.resetIcon),
                       onPressed: () {
-                        widget.initialDate = null;
                         widget.focusNode.unfocus();
                         _previousValue = '';
                         widget.controller.clear();
